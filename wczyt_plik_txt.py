@@ -3,6 +3,7 @@ from geo_v2 import *
 geo = Transformacje(model = 'wgs84')
 
 plik = 'wsp_inp.txt'
+
 #odczyt z pliku
 tablica = np.genfromtxt(plik, delimiter = ',', skip_header = 4)
 
@@ -30,9 +31,7 @@ for wiersz in tablica:
      wynik[i, 8] = x1992
      wynik[i, 9] = y1992
      
-     
      i+=1
-     print(i)
 print(wynik)
     
-np.savetxt('wsp_out.txt', wynik, delimiter = ',', fmt = ['%10.7f', '%10.7f','%10.3f','%10.3f','%10.3f','%10.3f','%10.3f','%10.3f','%10.3f','%10.3f'], header = 'zamiana współrzednych geodezyjnych by Kacper Barwicki :)')
+np.savetxt('wsp_out.txt', wynik, delimiter = ',', fmt = ['%10.7f', '%10.7f','%10.3f','%10.3f','%10.3f','%10.3f','%10.3f','%10.3f','%10.3f','%10.3f'], header = 'Zamiana współrzednych geodezyjnych by Kacper Barwicki :)')
