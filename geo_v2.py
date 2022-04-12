@@ -1,5 +1,6 @@
 from math import sin, cos, sqrt, atan, atan2, degrees, radians, pi, tan
-from numpy import deg2rad, matrix, sqrt
+from numpy import rad2deg, deg2rad, floor, array, append, linalg, dot, arccos
+
 
 class Transformacje:
     def __init__(self, model: str = "wgs84"):
@@ -28,6 +29,28 @@ class Transformacje:
         self.ecc = sqrt(2 * self.flat - self.flat ** 2) # eccentricity  WGS84:0.0818191910428 
         self.ecc2 = (2 * self.flat - self.flat ** 2) # eccentricity**2
 
+    def dms2deg(self, dms):
+        '''
+        This method convert deg, min, sek to decimal degree
+        '''
+        d = dms[0]; m = dms[1]; s = dms[2]
+        decimal_degree = d+m/60+s/3600
+        return (decimal_degree)
+    
+    def deg2dms(self, decimal_degree):
+        '''
+        This method convert decimal degree to deg, min, sek   
+        '''
+        decimal_degree = decimal_degree / 3600
+        dms = array([])
+        st = floor(decimal_degree)
+        append(dms, st)
+        m = floor((decimal_degree - st)*60)
+        append(dms, m)
+        sek = (decimal_degree - st - m/60)*3600
+        append(dms, sek)
+        print(dms)
+        return (dms)
 
 #Wspolrzedne geocentryczne XYZ --> phi, lam, h
    
@@ -73,6 +96,8 @@ class Transformacje:
         else:
             raise NotImplementedError(f"{output} - output format not defined")
             
+
+
 
 #Definicja N
     
@@ -128,7 +153,7 @@ class Transformacje:
         x = xgk * m2000;
         y = ygk * m2000 + L0*(180/pi/3)* 1000000 + 500000;
     
-       # print("2000: x=",format(x, '10.3f'), "y= ",format(y, '10.3f'))
+        print("2000: x=",format(x, '10.3f'), "y= ",format(y, '10.3f'))
     
     
         return(x,y)
@@ -142,10 +167,11 @@ class Transformacje:
         x = xgk * m92 - 5300000;
         y = ygk * m92 + 500000;
 
-        #print("1992: x=",format(x, '10.3f'), "y= ",format(y, '10.3f'))
+        print("1992: x=",format(x, '10.3f'), "y= ",format(y, '10.3f'))
     
     
         return(x,y)
+    
 #zamiana na NEU
     
     def s_A_z2neu (self,s, A, z):
@@ -157,6 +183,47 @@ class Transformacje:
 
         return (n, e, u)
     
+# Wyznaczanie kata azymutu i kata elewacji
+    
+    def st_m_s_cos_z (phi):
+        kat_stopni = rad2deg(phi)
+        stopni = floor(kat_stopni)
+        minuty = floor((kat_stopni - stopni)*60)
+        sekundy = (kat_stopni - stopni - minuty/60)*3600
+        
+    def Elewacyjny(self, fa,la,ha,fb,lb,hb):
+        N_a = self.a/sqrt(1-self.ecc2*sin(fa)**2)
+        R_a = array([(N_a+ha)*cos(fa)*cos(la),
+                          (N_a+ha)*cos(fa)*sin(la), 
+                          (N_a*(1-self.ecc2)+ha)*sin(fa)])
+        
+        N_b = self.a/sqrt(1-self.ecc2*sin(fb)**2)
+        R_b = array([(N_b+hb)*cos(fb)*cos(lb),
+                          (N_b+hb)*cos(fb)*sin(lb),
+                          (N_b*(1-self.ecc2)+hb)*sin(fb)])
+        
+        R_delta = R_b - R_a
+        R_dlugosc  = linalg.norm(R_delta, 2)
+        
+        R = R_delta / R_dlugosc
+        
+        n  =array([-1 * sin(fa)*cos(la),
+                      -1 * sin(fa)*sin(la),
+                      cos(fa)])
+        
+        e  =array([-1 * sin(la),
+                      cos(la),
+                      0]) 
+        
+        u  =array([cos(fa)*cos(la),
+              cos(fa)*sin(la),
+              sin(fa)])
+        
+        cos_z = float(dot(u, R))
+        zenith = arccos(cos_z)
+        
+        return(zenith)
+        
 # Wyznaczanie kata azymutu i odleglosci 2D
     def azytmut2D(self, fa, la, fb, lb, a, e2):
     
@@ -210,25 +277,17 @@ class Transformacje:
             Aab = Aab + 2*pi
         
         return(sab, Aab, Aba)
-
-# Odleglosc 3D
-    def odleglosc_3D(self,Xa,Xb,Ya,Yb,Za,Zb):
-        
-        delta_x = Xb - Xa
-        delta_y = Yb - Ya
-        delta_z = Zb - Za
-        odleglosc = sqrt(delta_x**2+delta_y**2+delta_z**2)
-        
-        return(odleglosc)
     
-#kat elewacji
+# Odleglosc 2D i 3D
 
-
-
-
-
-
-        
+    def odl2D(self, Xa, Ya, Xb, Yb):
+        odl2D_AB =sqrt((Xb-Xa)**2 +(Yb-Ya)**2)
+        return(odl2D_AB)
+            
+    def odl3D(self, Xa, Ya, Za, Xb, Yb, Zb):
+        odl3D_AB = sqrt((Xb -Xa)**2 + (Yb -Ya)**2 + (Zb -Za)**2)
+        return(odl3D_AB)
+    
 if __name__ == "__main__":
     # utworzenie obiektu
     geo = Transformacje(model = "wgs84")
@@ -236,6 +295,5 @@ if __name__ == "__main__":
     X = 3664940.500; Y = 1409153.590; Z = 5009571.170
     phi, lam, h = geo.xyz2plh(X, Y, Z)
     print(phi, lam, h)
-    phi, lam, h = geo.xyz2plh(X, Y, Z)
+    phi, lam, h = geo.xyz2plh2(X, Y, Z)
     print(phi, lam, h)
-    
