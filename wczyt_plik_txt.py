@@ -35,4 +35,4 @@ i+=1
 print(wynik)
     
 np.savetxt('wsp_out.txt', wynik, delimiter = ',', fmt = ['%10.7f', '%10.7f','%10.3f','%10.3f','%10.3f','%10.3f','%10.3f','%10.3f','%10.3f','%10.3f'], 
-           header = 'Kacper Barwicki \n Wydział Geodezji i Kartografii \n Zamiana współrzędnych geodezyjnych')
+header = 'Kacper Barwicki \n Wydział Geodezji i Kartografii \n Zamiana współrzędnych geodezyjnych')
