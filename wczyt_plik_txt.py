@@ -1,7 +1,7 @@
 import numpy as np
 from geo_v2 import *
 
-geo = Transformacje(model = 'wgs84')
+geo = Transformacje(model = 'wgs84') # <- tutaj wpisujemy, który model elipsojdy nas interesuje: "wgs84", "grs80", "mars".
 
 plik = 'wsp_inp.txt'
 #odczyt z pliku
